@@ -4,7 +4,6 @@ ngModule.config(($locationProvider, $compileProvider, uiSelectConfig, toastrConf
   $compileProvider.debugInfoEnabled(false);
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|data|tel|sms|mailto):/);
   $locationProvider.html5Mode(true);
-  uiSelectConfig.theme = 'bootstrap';
 
   Object.assign(toastrConfig, {
     positionClass: 'toast-bottom-right',

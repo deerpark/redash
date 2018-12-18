@@ -141,19 +141,38 @@
         </table>
       </div>
     </nav>
-
     <div class="content">
       <div class="flex-fill p-relative">
-        <div class="p-absolute d-flex flex-column p-l-15 p-r-15" style="left: 0; top: 0; right: 0; bottom: 0; overflow: auto">
-          <div class="row editor" resizable r-directions="['bottom']" r-flex="true" resizable-toggle
-               style="min-height: 11px; max-height: 70vh;" ng-if="sourceMode">
+        <div class="p-absolute d-flex flex-row p-l-15 p-r-15" style="left: 0; top: 0; right: 0; bottom: 0; overflow: auto">
+          <div class="row editor" resizable r-directions="['right']" r-flex="true" resizable-toggle
+              ng-style="{'min-width': '300px', 'max-width': '70vh'}" ng-if="sourceMode && isSqlQuery">
             <query-editor
               style="width: 100%; height: 100%;"
               query-text="query.query"
               schema="schema"
               syntax="dataSource.syntax"
+              listen-for-resize="listenForResize"
+              listen-for-editor-command="listenForEditorCommand"
+              update-query="updateQuery"
+              add-new-parameter="addNewParameter"
+              data-data-source="dataSource" />
+          </div>
+          <div class="row editor" resizable r-directions="['right']" r-flex="true" resizable-toggle
+              ng-style="{'flex-basis': '670px', 'min-width': '10px'}" ng-if="sourceMode && !isSqlQuery">
+               
+            <visual-query-editor
+              style="width: 100%; height: 100%;"
+              source-mode="sourceMode"
+              query-text="query.query"
               can-edit="canEdit"
               is-dirty="isDirty"
+              schema="schema"
+              listen-for-resize="listenForResize"
+              listen-for-editor-command="listenForEditorCommand"
+              update-query="updateQuery"
+              add-new-parameter="addNewParameter"
+              data-data-source="dataSource" />
+              <!-- syntax="dataSource.syntax"
               is-query-owner="isQueryOwner"
               update-data-source="updateDataSource"
               execute-query="executeQuery"
@@ -165,31 +184,11 @@
               update-query="updateQuery"
               add-new-parameter="addNewParameter"
               data-data-source="dataSource"
-              data-data-sources="dataSources"></query-editor>
-          </div>
-
-          <div class="row query-metadata__mobile">
-            <img ng-src="{{ query.user.profile_image_url }}" class="profile__image_thumb">
-            <div class="flex-fill m-r-10">
-              <strong class="meta__name" ng-class="{'text-muted': query.user.is_disabled}">{{query.user.name}}</strong>
-              created <rd-time-ago value="query.created_at"></rd-time-ago>
-            </div>
-
-            <img ng-src="{{ query.last_modified_by.profile_image_url }}" class="profile__image_thumb">
-            <div class="flex-fill m-r-10">
-              <strong class="meta__name" ng-class="{'text-muted': query.last_modified_by.is_disabled}">{{query.last_modified_by.name}}</strong>
-              updated <rd-time-ago value="query.updated_at"></rd-time-ago>
-            </div>
-
-            <div>
-              <span class="query-metadata__property">Refresh schedule:</span>
-              <a ng-click="openScheduleForm()" ng-if="!query.isNew()">{{query.schedule | scheduleHumanize}}</a>
-              <span ng-if="query.isNew()">Never</span>
-            </div>
+              data-data-sources="dataSources" /> -->
           </div>
 
           <section class="flex-fill p-relative t-body query-visualizations-wrapper">
-            <div class="d-flex flex-column p-b-15 p-absolute static-position__mobile" style="left: 0; top: 0; right: 0; bottom: 0;">
+            <div class="d-flex flex-column p-b-15 p-absolute static-position__mobile" style="left: 20px; top: 0; right: 0; bottom: 0;">
               <div class="p-t-15 p-b-5" ng-if="query.getParametersDefs().length > 0">
                 <parameters parameters="query.getParametersDefs()" sync-values="!query.isNew()" editable="sourceMode && canEdit"></parameters>
               </div>
@@ -252,7 +251,27 @@
           </section>
         </div>
       </div>
+
       <div class="bottom-controller-container">
+        <div class="row query-metadata__mobile">
+          <img ng-src="{{ query.user.profile_image_url }}" class="profile__image_thumb">
+          <div class="flex-fill m-r-10">
+            <strong class="meta__name" ng-class="{'text-muted': query.user.is_disabled}">{{query.user.name}}</strong>
+            created <rd-time-ago value="query.created_at"></rd-time-ago>
+          </div>
+  
+          <img ng-src="{{ query.last_modified_by.profile_image_url }}" class="profile__image_thumb">
+          <div class="flex-fill m-r-10">
+            <strong class="meta__name" ng-class="{'text-muted': query.last_modified_by.is_disabled}">{{query.last_modified_by.name}}</strong>
+            updated <rd-time-ago value="query.updated_at"></rd-time-ago>
+          </div>
+  
+          <div>
+            <span class="query-metadata__property">Refresh schedule:</span>
+            <a ng-click="openScheduleForm()" ng-if="!query.isNew()">{{query.schedule | scheduleHumanize}}</a>
+            <span ng-if="query.isNew()">Never</span>
+          </div>
+        </div>
         <div class="bottom-controller">
 
           <button class="m-r-5 btn btn-default btn-edit-visualisation" ng-click="openVisualizationEditor(selectedTab)" ng-if="!query.isNew() && canEdit"><span class="fa fa-edit"></span><span class="hidden-xs hidden-s hidden-m"> Edit Visualization</span></button>
@@ -284,6 +303,43 @@
                 </a>
               </li>
             </ul>
+          </div>
+
+          <div class="form-inline d-flex">
+            <select
+              class="form-control datasource-small flex-fill w-100"
+              ng-change="{updateDataSource}"
+              disabled="{!isQueryOwner}"
+              ng-model="test"
+            >
+              <option
+                ng-repeat="ds in dataSources"
+                label="{{ds.name}}"
+                value="{{ds.id}}"
+              >
+                {{ ds.name }}
+              </option>
+            </select>
+            <button
+              class="btn btn-default m-l-5"
+              ng-click="saveQuery()"
+              title="Save"
+              ng-if="canEdit"
+            >
+              <span class="fa fa-floppy-o"></span>
+              <span class="hidden-xs m-l-5">Save</span>
+              <span ng-if="isDirty">*</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary m-l-5"
+              ng-class="{'disabled' : isExecuteDisabled}"
+              ng-disabled="isExecuteDisabled"
+              ng-click="executeQuery();"
+            >
+              <span class="zmdi zmdi-play"></span>
+              <span class="hidden-xs m-l-5">Execute</span>
+            </button>
           </div>
 
           <span class="query-metadata__bottom" ng-if="queryResult.getData()">

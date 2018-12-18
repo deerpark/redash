@@ -58,16 +58,7 @@ class QueryEditor extends React.Component {
     queryText: PropTypes.string.isRequired,
     schema: Schema, // eslint-disable-line react/no-unused-prop-types
     addNewParameter: PropTypes.func.isRequired,
-    dataSources: PropTypes.arrayOf(DataSource),
     dataSource: DataSource,
-    canEdit: PropTypes.bool.isRequired,
-    isDirty: PropTypes.bool.isRequired,
-    isQueryOwner: PropTypes.bool.isRequired,
-    updateDataSource: PropTypes.func.isRequired,
-    canExecuteQuery: PropTypes.func.isRequired,
-    executeQuery: PropTypes.func.isRequired,
-    queryExecuting: PropTypes.bool.isRequired,
-    saveQuery: PropTypes.func.isRequired,
     updateQuery: PropTypes.func.isRequired,
     listenForResize: PropTypes.func.isRequired,
     listenForEditorCommand: PropTypes.func.isRequired,
@@ -76,7 +67,6 @@ class QueryEditor extends React.Component {
   static defaultProps = {
     schema: null,
     dataSource: {},
-    dataSources: [],
   };
 
   constructor(props) {
@@ -107,7 +97,7 @@ class QueryEditor extends React.Component {
 
       // eslint-disable-next-line react/prop-types
       this.props.QuerySnippet.query((snippets) => {
-        const snippetManager = snippetsModule.snippetManager;
+        const { snippetManager } = snippetsModule;
         const m = {
           snippetText: '',
         };
@@ -170,13 +160,11 @@ class QueryEditor extends React.Component {
   toggleAutocomplete = (state) => {
     this.setState({ autocompleteQuery: state });
     localOptions.set('liveAutocomplete', state);
-  }
+  };
 
   render() {
     // eslint-disable-next-line react/prop-types
     const modKey = this.props.KeyboardShortcuts.modKey;
-
-    const isExecuteDisabled = this.props.queryExecuting || !this.props.canExecuteQuery();
 
     return (
       <section style={{ height: '100%' }}>
@@ -224,12 +212,13 @@ class QueryEditor extends React.Component {
                   <span className="zmdi zmdi-format-indent-increase" />
                 </button>
               </Tooltip>
+              {this.state.queryText}
               <AutocompleteToggle
                 state={this.state.autocompleteQuery}
                 onToggle={this.toggleAutocomplete}
                 disabled={this.state.liveAutocompleteDisabled}
               />
-              <select
+              {/* <select
                 className="form-control datasource-small flex-fill w-100"
                 onChange={this.props.updateDataSource}
                 disabled={!this.props.isQueryOwner}
@@ -250,23 +239,19 @@ class QueryEditor extends React.Component {
                 </Tooltip>
               ) : null}
               <Tooltip placement="top" title={modKey + ' + Enter'}>
-                {/*
+                {/
                   Tooltip wraps disabled buttons with `<span>` and moves all styles
                   and classes to that `<span>`. There is a piece of CSS that fixes
                   button appearance, but also wwe need to add `disabled` class to
                   disabled buttons so it will be assigned to wrapper and make it
                   looking properly
-                */}
+                /}
                 <button
                   type="button"
-                  className={'btn btn-primary m-l-5' + (isExecuteDisabled ? ' disabled' : '')}
-                  disabled={isExecuteDisabled}
-                  onClick={this.props.executeQuery}
                 >
-                  <span className="zmdi zmdi-play" />
                   <span className="hidden-xs m-l-5">Execute</span>
                 </button>
-              </Tooltip>
+              </Tooltip> */}
             </div>
           </div>
         </div>

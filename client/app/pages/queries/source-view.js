@@ -21,6 +21,7 @@ function QuerySourceCtrl(
   const saveQuery = $scope.saveQuery;
 
   $scope.sourceMode = true;
+  $scope.isSqlQuery = false;
   $scope.isDirty = false;
   $scope.base_url = `${$location.protocol()}://${$location.host()}:${$location.port()}`;
   $scope.modKey = KeyboardShortcuts.modKey;
@@ -51,7 +52,11 @@ function QuerySourceCtrl(
 
   $scope.canForkQuery = () => currentUser.hasPermission('edit_query') && !$scope.dataSource.view_only;
 
-  $scope.updateQuery = newQueryText => defer(() => $scope.$apply(() => { $scope.query.query = newQueryText; }));
+  $scope.updateQuery = newQueryText =>
+    defer(() =>
+      $scope.$apply(() => {
+        $scope.query.query = newQueryText;
+      }));
 
   // @override
   $scope.saveQuery = (options, data) => {
@@ -141,4 +146,3 @@ export default function init(ngModule) {
 }
 
 init.init = true;
-

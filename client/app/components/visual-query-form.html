@@ -1,0 +1,202 @@
+<style>
+  .empty {
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .empty-icon {
+    margin: 0 auto;
+    margin-bottom: 20px;
+    font-size: 48px;
+  }
+  .empty-title {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  .empty-txt {
+    font-size: 11px;
+    opacity: 0.5;
+  }
+</style>
+
+<section
+  class="flex-fill p-relative t-body query-visualizations-wrapper"
+  ng-style="{height: '100%'}"
+>
+  <div
+    class="d-flex flex-column p-b-15 p-absolute static-position__mobile"
+    style="left: 0; top: 0; right: 0; bottom: 0;"
+  >
+    <div class="flex-fill p-relative">
+      <ul class="tab-nav">
+        <rd-tab
+          tab-id="segment"
+          name="Segment"
+          base-path="'/queries/new'"
+        ></rd-tab>
+        <li class="rd-tab tab-new-vis">
+          <a
+            ng-click="$ctrl.addSegment()"
+            class="btn btn-default"
+            ng-if="$ctrl.canEdit"
+          >
+            <i class="fa fa-plus m-r-5 m-l-5"></i>
+            <span class="m-r-5">Add Segment</span></a
+          >
+        </li>
+      </ul>
+      <div ng-if="selectedTab == 'segment'" class="query__vis m-t-15">
+        <div class="form-container">
+          <div class="form-body">
+            <div class="empty" ng-if="!$ctrl.segments.length">
+              <i class="empty-icon fa fa-quote-left"></i>
+              <h3 class="empty-title">생성된 이벤트가 없습니다.</h3>
+              <p class="empty-txt">이벤트를 생성해주세요.</p>
+            </div>
+            <div class="events">
+              <div
+                class="event d-flex flex-row align-items-start"
+                ng-repeat="segment in $ctrl.segments track by $index"
+              >
+                <h3
+                  class="m-0 d-flex justify-content-center align-items-center"
+                  ng-style="{width: '50px', height: '35px'}"
+                >
+                  {{ segment.order }}
+                </h3>
+                <div class="form-groups flex-fill">
+                  <div
+                    class="form-groups d-flex flex-row justify-content-between align-items-center m-b-10"
+                  >
+                    <div class="input-group">
+                      <!-- event -->
+                      <div ng-style="{width: '310px', 'padding-left': '110px'}">
+                        <ui-select ng-model="segment.event">
+                          <ui-select-match placeholder="Select Event...">
+                            <span ng-bind-html="$select.selected.name"></span>
+                          </ui-select-match>
+                          <ui-select-choices
+                            repeat="event.value as event in $ctrl.events | filter:$select.search track by $index"
+                          >
+                            <span
+                              ng-bind-html="$ctrl.events[$index].name"
+                            ></span>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div>
+                    <!-- action -->
+                    <div
+                      class="group-action d-flex flex-row align-items-center"
+                    >
+                      <button
+                        class="btn btn-xs btn-default m-r-10"
+                        ng-click="$ctrl.createSegmentWhere($index)"
+                      >
+                        <i class="fa fa-plus"></i> where
+                      </button>
+                      <button class="btn btn-xs btn-default m-r-10">
+                        <i class="fa fa-plus"></i> group by
+                      </button>
+                      <button
+                        class="btn btn-xs btn-default"
+                        ng-click="$ctrl.removeSegment($index)"
+                      >
+                        <i class="fa fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <!-- where -->
+                  <div ng-if="segment.where.length" class="form-groups">
+                    <div
+                      class="input-group d-flex flex-row align-items-center m-b-10"
+                      ng-repeat="where in segment.where"
+                    >
+                      <span
+                        class="m-r-10"
+                        ng-style="{display: 'flex', 'flex-basis': '100px', 'justify-content': 'flex-end'}"
+                        >where</span
+                      >
+                      <!-- property -->
+                      <div ng-style="{width: '200px'}" class="m-r-10">
+                        <ui-select ng-model="where.property">
+                          <ui-select-match
+                            placeholder="Select User Property..."
+                          >
+                            {{ $select.selected.name }}
+                          </ui-select-match>
+                          <ui-select-choices
+                            repeat="userProperty.value as userProperty in $ctrl.userProperties | filter:$select.search track by $index"
+                          >
+                            <span>{{ $ctrl.userProperties[$index].name }}</span>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                      <!-- equal -->
+                      <div ng-style="{width: '50px'}" class="m-r-10">
+                        <ui-select ng-model="where.equal">
+                          <ui-select-match placeholder="=">
+                            {{ $select.selected.name }}
+                          </ui-select-match>
+                          <ui-select-choices
+                            repeat="equal.value as equal in $ctrl.equals | filter:$select.search track by $index"
+                          >
+                            <span>{{ $ctrl.equals[$index].name }}</span>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                      <!-- value -->
+                      <div>
+                        <ui-select
+                          multiple
+                          sortable="true"
+                          ng-model="where.value"
+                          class="btn btn-default form-control ui-select-toggle"
+                        >
+                          <ui-select-match placeholder="Select Value...">
+                            {{ $item }}
+                          </ui-select-match>
+                          <ui-select-choices
+                            repeat="value in $ctrl.userProperties[where.id].values | filter:$select.search track by $index"
+                          >
+                            <span>{{ value }}</span>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- group by -->
+                  <div ng-if="segment.groupBy.length" class="form-groups">
+                    <div
+                      class="input-group d-flex flex-row align-items-center m-b-10"
+                      ng-repeat="groupBy in segment.groupBy track by $index"
+                    >
+                      <span
+                        class="m-r-10"
+                        ng-style="{display: 'flex', 'flex-basis': '100px', 'justify-content': 'flex-end'}"
+                        >group by</span
+                      >
+                      <!-- property -->
+                      <div ng-style="{width: '200px'}" class="m-r-10">
+                        <ui-select ng-model="groupBy">
+                          <ui-select-match placeholder="Select Property...">
+                            {{ $select.selected.name }}
+                          </ui-select-match>
+                          <ui-select-choices
+                            repeat="userProperty.value as userProperty in $ctrl.userProperties | filter:$select.search track by $index"
+                          >
+                            <span>{{ userProperty.name }}</span>
+                          </ui-select-choices>
+                        </ui-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
